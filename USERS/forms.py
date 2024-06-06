@@ -8,4 +8,9 @@ class CustomUserCreationForm(UserCreationForm):
     
     class Meta:
         model = CustomUser
-        fields = ('username', 'phone_number', 'password1', 'password2')
+        fields = ('username', 'phone_number', 'password', 'confirm_password')
+        
+
+class LoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
