@@ -1,46 +1,43 @@
-from django.shortcuts import render, redirect
-from LOCATION.MODELS.location import Location
-from LOCATION.forms import TrackForm
-from USERS.MODELS.user import CustomUser
+from django.conf import settings
+from django.shortcuts import render
 import requests
-
 
 def track_view(request):
     if request.method == 'POST':
-        form = TrackForm(request.POST)
-        if form.is_valid():
-            phone_number = form.cleaned_data['phone_number']
-            user = CustomUser.objects.filter(phone_number=phone_number).first()
-            if user:
-                location_data = fetch_location_data(phone_number)
-                if location_data:
-                    Location.objects.create(
-                        user=user,
-                        area=location_data['area'],
-                        city=location_data['city'],
-                        state=location_data['state'],
-                        country=location_data['country']
-                    )
-                    locations = user.locations.order_by('-timestamp')
-                    return render(request, 'USERS\TEMPLATES\LOCATION\track.html', {'locations': locations, 'phone_number': phone_number})
-    else:
-        form = TrackForm()
-    return render(request, 'USERS\TEMPLATES\LOCATION\track.html', {'form': form})
+        phone_number = request.POST.get('phone_number')
 
-def fetch_location_data(phone_number):
-    API_URL = 'https://phonevalidation.abstractapi.com/v1/'
-    API_KEY = ''
+        if phone_number:
+            # Use the Abstract API to validate the phone number
+            abstract_url = f'https://phonevalidation.abstractapi.com/v1/?api_key={settings.ABSTRACT_API_KEY}&phone={phone_number}'
+            response = requests.get(abstract_url)
 
-    try:
-        response = requests.get(API_URL, params={'api_key': API_KEY, 'phone': phone_number})
-        response.raise_for_status()
-        data = response.json()
-        return {
-            'area': data.get('location'),
-            'city': data.get('city'),
-            'state': data.get('state'),
-            'country': data.get('country')
-        }
-    except requests.RequestException as e:
-        print(f"Error fetching location data: {e}")
-        return None
+            if response.status_code == 200:
+                data = response.json()
+
+                # Use IPinfo to get location data based on the IP address
+                ipinfo_url = f'https://ipinfo.io/json?token={settings.IPINFO_API_TOKEN}'
+                ipinfo_response = requests.get(ipinfo_url)
+
+                if ipinfo_response.status_code == 200:
+                    ipinfo_data = ipinfo_response.json()
+                    location = ipinfo_data.get('loc')
+                    if location:
+                        lat, lng = location.split(',')
+
+                        data['latitude'] = lat
+                        data['longitude'] = lng
+                        data['detailed_location'] = f"{ipinfo_data.get('city')}, {ipinfo_data.get('region')}, {ipinfo_data.get('country')}"
+
+                        return render(request, 'LOCATION/track_result.html', {'data': data})
+                    else:
+                        error_message = "Error: No location data found in IPinfo response."
+                        return render(request, 'LOCATION/track.html', {'error': error_message})
+                else:
+                    error_message = f"Error: Unable to retrieve IPinfo data. Status code: {ipinfo_response.status_code}"
+                    return render(request, 'LOCATION/track.html', {'error': error_message})
+            else:
+                error_message = f"Error: Unable to retrieve data from Abstract API. Status code: {response.status_code}"
+                return render(request, 'LOCATION/track.html', {'error': error_message})
+        else:
+            return render(request, 'LOCATION/track.html', {'error': 'Please provide a phone number.'})
+    return render(request, 'LOCATION/track.html')

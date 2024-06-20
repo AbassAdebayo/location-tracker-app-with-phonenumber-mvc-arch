@@ -1,1 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
 
+{% block title %}Track Phone Number{% endblock %}
+
+{% block content %}
+<div class="video-background">
+    <video autoplay loop muted id="background-video">
+        <source src="{% static 'users/videos/track_background.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+<div class="animation-container">
+    <div class="rotating-logo"></div>
+    <div class="rotating-map"></div>
+</div>
+<div class="content-container">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h2 class="text-center text-light">Track Phone Number</h2>
+                <form method="post" id="track-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="phone_number" class="form-label text-light">Phone Number:</label>
+                        <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                    </div>
+                    <input type="hidden" id="latitude" name="latitude">
+                    <input type="hidden" id="longitude" name="longitude">
+                    <div class="d-flex justify-content-between">
+                        <button type="button" id="get-location-btn" class="btn btn-secondary">Get Current Location</button>
+                        <button type="submit" class="btn btn-primary">Track</button>
+                    </div>
+                </form>
+                {% if error %}
+                    <p style="color: red;">{{ error }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<audio id="tracking-sound" preload="auto">
+    <source src="{% static 'users/sounds/tracking_sound.mp3' %}" type="audio/mp3">
+    Your browser does not support the audio tag.
+</audio>
+<button id="play-sound-btn" class="btn btn-primary">Play Sound</button>
+{% endblock %}
+
+{% block styles %}
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: none;
+}
+.video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+}
+video#background-video {
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-size: cover;
+}
+.content-container {
+    position: relative;
+    z-index: 2;
+}
+.animation-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    z-index: 1;
+}
+.rotating-logo, .rotating-map {
+    position: absolute;
+    animation: rotate 10s linear infinite;
+    width: 150px;
+    height: 150px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+.rotating-logo {
+    background-image: url('{% static "users/images/track_logo.png" %}');
+    z-index: 1;
+}
+.rotating-map {
+    background-image: url('{% static "users/images/map.png" %}');
+    z-index: 0;
+    width: 300px;
+    height: 300px;
+    animation-duration: 20s;
+}
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+#play-sound-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 3;
+}
+</style>
+{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Get references to form elements
+    const form = document.getElementById('track-form');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+    const getLocationBtn = document.getElementById('get-location-btn');
+    const trackingSound = document.getElementById('tracking-sound');
+    const playSoundBtn = document.getElementById('play-sound-btn');
+
+    // Add event listener to get location button
+    getLocationBtn.addEventListener('click', function() {
+        // Check if geolocation is supported by the browser
+        if (navigator.geolocation) {
+            // Request current position
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Update form inputs with latitude and longitude
+                    latitudeInput.value = position.coords.latitude;
+                    longitudeInput.value = position.coords.longitude;
+                    alert('Location retrieved successfully!');
+                },
+                function(error) {
+                    console.error('Error getting location:', error);
+                    alert('Error getting location. Please try again.');
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    });
+
+    // Play the tracking sound
+    const playSound = () => {
+        trackingSound.play().catch(error => {
+            console.error('Error playing sound:', error);
+            playSoundBtn.style.display = 'block'; // Show the button if autoplay fails
+        });
+    };
+
+    // Try to play the sound when the page loads
+    playSound();
+
+    // Add event listener to play sound button
+    playSoundBtn.addEventListener('click', () => {
+        trackingSound.muted = false; // Unmute the sound
+        trackingSound.volume = 1.0; // Set volume to maximum
+        playSound();
+        playSoundBtn.style.display = 'none'; // Hide the button after clicking
+    });
+});
+</script>
