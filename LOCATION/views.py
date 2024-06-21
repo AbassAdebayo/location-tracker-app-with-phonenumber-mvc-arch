@@ -1,7 +1,10 @@
 from django.conf import settings
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 import requests
 
+
+@login_required
 def track_view(request):
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number')

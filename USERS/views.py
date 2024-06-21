@@ -7,7 +7,9 @@ from .forms import LoginForm
 
 
 def home_view(request):
-    return render(request, 'home.html')
+    if request.user.is_authenticated:
+        return redirect('track')
+    return render(request, 'USERS/login.html')
 
 
 def signup_view(request):
@@ -19,7 +21,7 @@ def signup_view(request):
             raw_password = form.cleaned_data.get('password')
             user = authenticate(email=email, password=raw_password)
             login(request, user)
-            return redirect('home')
+            return redirect('track')
         
     else:
         form = CustomUserCreationForm()
@@ -37,7 +39,7 @@ def login_view(request):
                 login(request, user)
                 return redirect('track')
             else:
-                form.add_error(None, 'Invalid email or password')
+                return render(request, 'USERS/login.html', {'error': 'Invalid username or password'})
                 
     else:
         form  = LoginForm()
