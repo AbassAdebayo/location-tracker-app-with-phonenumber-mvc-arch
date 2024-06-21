@@ -2,6 +2,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from .forms import LoginForm
+from django.contrib import messages
 
 
 
@@ -9,7 +10,8 @@ from .forms import LoginForm
 def home_view(request):
     if request.user.is_authenticated:
         return redirect('track')
-    return render(request, 'USERS/login.html')
+    else:
+        return redirect('login')
 
 
 def signup_view(request):
@@ -39,7 +41,9 @@ def login_view(request):
                 login(request, user)
                 return redirect('track')
             else:
-                return render(request, 'USERS/login.html', {'error': 'Invalid username or password'})
+                messages.error(request, "Invalid email or password")
+        else:
+            messages.error(request, "Invalid email or password")
                 
     else:
         form  = LoginForm()

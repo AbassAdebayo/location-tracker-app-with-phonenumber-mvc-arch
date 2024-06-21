@@ -36,6 +36,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+SESSION_COOKIE_AGE = 60  # 1 minute
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Set the session to expire on browser close
+SESSION_SAVE_EVERY_REQUEST = True
+
 # Templates configuration
 TEMPLATES = [
     {

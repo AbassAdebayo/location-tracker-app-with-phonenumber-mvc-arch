@@ -20,22 +20,27 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link colorful-link" href="{% url 'signup' %}">Sign Up</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link colorful-link" href="{% url 'login' %}">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link colorful-link" href="{% url 'track' %}">Track Location</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link colorful-link" href="{% url 'logout' %}">Logout</a>
-                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link colorful-link" href="{% url 'track' %}">Track Location</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link colorful-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link colorful-link" href="{% url 'signup' %}">Sign Up</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
     <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
         {% block content %}{% endblock %}
     </div>
 </body>
