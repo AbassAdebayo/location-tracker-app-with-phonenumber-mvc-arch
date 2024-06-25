@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
 
-class LocationCofig(AppConfig):
+class LocationConfig(AppConfig):
     name = 'LOCATION'
+    label = 'LOCATION'

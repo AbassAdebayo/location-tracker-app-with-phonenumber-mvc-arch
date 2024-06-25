@@ -3,15 +3,17 @@ from pathlib import Path
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Security settings
 SECRET_KEY = 'your-secret-key'
+ABSTRACT_API_KEY = ''
+OPENCAGE_API_KEY = ''
+IPINFO_API_TOKEN = ''
 DEBUG = True  # Set to False in production
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -19,9 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'USERS',
     'LOCATION',
-    'rest_framework',
-    'django.contrib.auth',
+    'rest_framework'
 ]
+
 
 # Middleware
 MIDDLEWARE = [
@@ -33,6 +35,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+SESSION_COOKIE_AGE = 60  # 1 minute
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Set the session to expire on browser close
+SESSION_SAVE_EVERY_REQUEST = True
 
 # Templates configuration
 TEMPLATES = [
@@ -51,16 +62,13 @@ TEMPLATES = [
     },
 ]
 
-# WSGI application
-WSGI_APPLICATION = 'your_project.wsgi.application'
-
 # Database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'track app',
+        'NAME': 'location_tracking_db',
         'USER': 'track_app_user',
-        'PASSWORD': 'DEFINEDCODE',
+        'PASSWORD': 'DefinedCode',
         'HOST': 'localhost',  
         'PORT': '3306', 
     }
@@ -93,10 +101,17 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
+# WSGI application
+WSGI_APPLICATION = 'LOCATION_TRACKING_APP.wsgi.application'
+ASGI_APPLICATION = 'LOCATION_TRACKING_APP.asgi.application'
+
+ROOT_URLCONF = 'LOCATION_TRACKING_APP.urls'
+
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication settings
-AUTH_USER_MODEL = 'USER.user.CustomUser'
+AUTH_USER_MODEL = 'USERS.CustomUser'
 LOGIN_REDIRECT_URL = 'track'
 LOGOUT_REDIRECT_URL = 'login'

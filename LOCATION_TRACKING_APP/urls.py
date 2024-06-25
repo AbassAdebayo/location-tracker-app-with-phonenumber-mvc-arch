@@ -1,9 +1,13 @@
-from django.contrib import admin
+# from django.contrib import admin
 from django.urls import path, include
+from USERS.views import home_view
+from django.views.generic import RedirectView
 
 
-url_patterns = [
-    path('admin/', admin.site.urls),
-    path('users/', include('users.urls')),
-    path('location/', include('location.urls')),
+urlpatterns = [
+
+    path('users/', include('USERS.urls')),
+    path('location/', include('LOCATION.urls')),
+    # path('', home_view, name='home'),
+    path('', RedirectView.as_view(url='users/login/')),
 ]
