@@ -52,7 +52,6 @@
 </div>
 
 {% endblock %}
-
 {% block styles %}
 <style>
 body, html {
@@ -141,61 +140,35 @@ video#background-video {
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Get references to form elements
         const form = document.getElementById('track-form');
-        const latitudeInput = document.getElementById('latitude');
-        const longitudeInput = document.getElementById('longitude');
-        const getLocationBtn = document.getElementById('get-location-btn');
         const trackingSound = document.getElementById('tracking-sound');
         const playSoundBtn = document.getElementById('play-sound-btn');
         const loadingAnimation = document.getElementById('loading-animation');
     
-        // Add event listener to get location button
-        getLocationBtn.addEventListener('click', function() {
-            // Check if geolocation is supported by the browser
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        latitudeInput.value = position.coords.latitude;
-                        longitudeInput.value = position.coords.longitude;
-                        alert('Location retrieved successfully!');
-                    },
-                    function(error) {
-                        console.error('Error getting location:', error);
-                        alert('Error getting location. Please try again.');
-                    }
-                );
-            } else {
-                alert('Geolocation is not supported by your browser.');
-            }
-        });
-    
         form.addEventListener('submit', function(event) {
-            
             event.preventDefault();
     
             loadingAnimation.style.display = 'block';
     
-            const playSound = () => {
-                trackingSound.play().catch(error => {
-                    console.error('Error playing sound:', error);
-                    playSoundBtn.style.display = 'block'; 
-                });
-            };
-    
             playSound();
     
-            setTimeout(() => {
+            setTimeout(function() {
+                loadingAnimation.style.display = 'none';
+    
                 form.submit();
             }, 5000);
         });
     
-        playSoundBtn.addEventListener('click', () => {
-            trackingSound.muted = false; 
-            trackingSound.volume = 1.0; 
+        playSoundBtn.addEventListener('click', function() {
             playSound();
-            playSoundBtn.style.display = 'none';
         });
+    
+        function playSound() {
+            trackingSound.play().catch(function(error) {
+                console.error('Error playing sound:', error);
+                playSoundBtn.style.display = 'block'; 
+            });
+        }
     });
-    </script>
+</script>
     
